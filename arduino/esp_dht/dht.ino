@@ -18,15 +18,15 @@
 #define WIFI_PASSWORD "4D7017ADA8B12"
 
 // Raspberri Pi Mosquitto MQTT Broker
-#define MQTT_HOST IPAddress(192, 168, 1, 6)
+#define MQTT_HOST IPAddress(192, 168, 1, 4)
 // For a cloud MQTT broker, type the domain name
-//#define MQTT_HOST "example.com"
+//#define MQTT_HOST "broker.hivemq.com"
 #define MQTT_PORT 1883
 
 // Temperature MQTT Topics
-#define MQTT_PUB_TEMP "esp/dht/temperature"
-#define MQTT_PUB_HUM "esp/dht/humidity"
-
+//#define MQTT_PUB_TEMP "esp/dht/temperature"
+//#define MQTT_PUB_HUM "esp/dht/humidity"
+#define MQTT_PUB "esp/dht"
 // Digital pin connected to the DHT sensor
 #define DHTPIN 0
 
@@ -142,14 +142,16 @@ void loop() {
     // Read temperature as Fahrenheit (isFahrenheit = true)
     //temp = dht.readTemperature(true);
 
-    // Publish an MQTT message on topic esp/dht/temperature
-    uint16_t packetIdPub1 = mqttClient.publish(MQTT_PUB_TEMP, 1, true, String(temp).c_str());
-    Serial.printf("Publishing on topic %s at QoS 1, packetId: %i ", MQTT_PUB_TEMP, packetIdPub1);
-    Serial.printf("Message: %.2f \n", temp);
 
+    // Publish an MQTT message on topic esp/dht/temperature
+    //uint16_t packetIdPub1 = mqttClient.publish(MQTT_PUB_TEMP, 1, true, String(temp+hum).c_str());
+    //Serial.printf("Publishing on topic %s at QoS 1, packetId: %i ", MQTT_PUB_TEMP, packetIdPub1);
+    //Serial.printf("Message: %.2f \n", temp);
+    char *msg = "";
+    snprintf (msg, 75, "%.2f||%.2f",temp,hum);
     // Publish an MQTT message on topic esp/dht/humidity
-    uint16_t packetIdPub2 = mqttClient.publish(MQTT_PUB_HUM, 1, true, String(hum).c_str());
-    Serial.printf("Publishing on topic %s at QoS 1, packetId %i: ", MQTT_PUB_HUM, packetIdPub2);
-    Serial.printf("Message: %.2f \n", hum);
+    uint16_t packetIdPub = mqttClient.publish(MQTT_PUB, 1, true, msg);
+    Serial.printf("Publishing on topic %s at QoS 1, packetId %i: \n", MQTT_PUB, packetIdPub);
+    Serial.println(msg);
   }
 }
