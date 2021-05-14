@@ -10,16 +10,19 @@ import (
 
 const (
 	ServerPort = ":8080"
+	TempTopic  = "esp/dht/temperature"
+	_HumTopic  = "esp/dht/humidity"
 )
 
 func main() {
 	/*
 	 Subscribe at multiple topics
-	 Insert into influxDB
+	 Insert into database
 	*/
+
 	router := gin.Default()
-	mqttConnection := broker.NewMqttConnection("Client-1")
-	mqttConnection.Subscribe("")
+	mqttConnection := broker.NewMqttConnection("Go-Client")
+	mqttConnection.Subscribe(TempTopic)
 	v1 := router.Group("/api/v1")
 	{
 		v1.GET("/health", api.HealthStatusHandler(mqttConnection))

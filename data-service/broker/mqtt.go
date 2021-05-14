@@ -9,8 +9,8 @@ import (
 
 const (
 	HostFormat = "tcp://%s:%s"
-	MqttHost   = "MQTT_HOST"
-	MqttPort   = "MQTT_PORT"
+	MqttHost   = "MQTT_HOST" // 192.168.1.4
+	MqttPort   = "MQTT_PORT" // 1883
 	QOS        = 1
 	//MqttClientName = "MQTT_CLINT_NAME"
 	//MqttTopicName  = "MQTT_TOPIC_NAME"
