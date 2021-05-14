@@ -8,11 +8,13 @@ import (
 )
 
 const (
-	HostFormat     = "tcp://%s:%s"
-	MqttHost       = "MQTT_HOST"
-	MqttPort       = "MQTT_PORT"
-	MqttClientName = "MQTT_CLINT_NAME"
-	MqttTopicName  = "MQTT_TOPIC_NAME"
+	HostFormat = "tcp://%s:%s"
+	MqttHost   = "MQTT_HOST"
+	MqttPort   = "MQTT_PORT"
+	QOS        = 1
+	//MqttClientName = "MQTT_CLINT_NAME"
+	//MqttTopicName  = "MQTT_TOPIC_NAME"
+
 )
 
 var (
@@ -43,4 +45,24 @@ func NewMqttConnection(clientId string) (conn *Connection) {
 	}
 	conn = &Connection{client}
 	return conn
+}
+func (conn *Connection) IsClientConnected() bool {
+	connected := conn.mqttClient.IsConnected()
+	if !connected {
+		log.Println("MQTT client is not connected")
+	}
+	return connected
+}
+
+func onMessageReceived() func(client mqtt.Client, msg mqtt.Message) {
+	return func(client mqtt.Client, msg mqtt.Message) {
+		log.Printf("Received message : %s from topic : %s ", msg.Payload(), msg.Topic())
+		// insertion here
+	}
+}
+
+func (conn *Connection) Subscribe(topic string) {
+	token := conn.mqttClient.Subscribe(topic, QOS, onMessageReceived())
+	token.Wait()
+	log.Println("Subscribed to topic : ", topic)
 }
