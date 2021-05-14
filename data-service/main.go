@@ -11,8 +11,7 @@ import (
 
 const (
 	ServerPort = ":8080"
-	TempTopic  = "esp/dht/temperature"
-	HumTopic   = "esp/dht/humidity"
+	DhtTopic   = "esp/dht"
 )
 
 func main() {
@@ -22,8 +21,7 @@ func main() {
 	router := gin.Default()
 	influxDBConnection := database.NewConnection()
 	mqttConnection := broker.NewMqttConnection()
-	mqttConnection.Subscribe(influxDBConnection, TempTopic)
-	mqttConnection.Subscribe(influxDBConnection, HumTopic)
+	mqttConnection.Subscribe(influxDBConnection, DhtTopic)
 	v1 := router.Group("/api/v1")
 	{
 		v1.GET("/health", api.HealthStatusHandler(mqttConnection, influxDBConnection))

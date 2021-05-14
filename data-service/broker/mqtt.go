@@ -1,13 +1,14 @@
 package broker
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/Kratos40-sba/data-service/database"
 	"github.com/Kratos40-sba/data-service/models"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -61,22 +62,23 @@ func onMessageReceived(influxConn *database.Connection) func(client mqtt.Client,
 	return func(client mqtt.Client, msg mqtt.Message) {
 		//log.Printf("Received message : %s from topic : %s ", msg.Payload(), msg.Topic())
 		// insertion here
-		HEvent := models.HumEvent{Time: time.Now().Unix()}
-		TEvent := models.TempEvent{Time: time.Now().Unix()}
+		event := models.DhtEvent{Time: time.Now().Unix()}
 		//b := new(bytes.Buffer)
 		switch msg.Topic() {
-		case "esp/dht/temperature":
-			err := json.Unmarshal(msg.Payload(), &TEvent.Temperature)
-			if err != nil {
-				log.Println("Encoding Temperature failed : ", err)
-			}
-			influxConn.InsertTemp(&TEvent)
-		case "esp/dht/humidity":
-			err := json.Unmarshal(msg.Payload(), &HEvent.Humidity)
-			if err != nil {
-				log.Println("Encoding Humidity failed : ", err)
-			}
-			influxConn.InsertHum(&HEvent)
+		case "esp/dht":
+			p := strings.Split(string(msg.Payload()), "||")
+			event.Temperature, _ = strconv.ParseFloat(p[0], 32)
+			event.Humidity, _ = strconv.ParseFloat(p[1], 32)
+			log.Println(event)
+			influxConn.Insert(&event)
+			/*
+				err := json.Unmarshal(msg.Payload(), &event.Temperature)
+				if err != nil {
+					log.Println("Encoding Temperature failed : ", err)
+				}
+
+			*/
+
 		default:
 			log.Println("Unknown Topic : ", msg.Topic())
 		}

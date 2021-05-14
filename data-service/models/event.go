@@ -1,12 +1,11 @@
 package models
 
-type DhtEvent interface {
-}
-type TempEvent struct {
+type DhtEvent struct {
 	Time        int64   `json:"time"`
 	Temperature float64 `json:"temperature"`
+	Humidity    float64 `json:"humidity"`
 }
-type HumEvent struct {
-	Time     int64   `json:"time"`
-	Humidity float64 `json:"humidty"`
+
+func (d DhtEvent) GetName() string {
+	return "DHT-SENSOR"
 }
