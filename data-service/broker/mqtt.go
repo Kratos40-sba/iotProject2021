@@ -13,8 +13,6 @@ const (
 	MqttPort   = "MQTT_PORT" // 1883
 	QOS        = 1
 	//MqttClientName = "MQTT_CLINT_NAME"
-	//MqttTopicName  = "MQTT_TOPIC_NAME"
-
 )
 
 var (

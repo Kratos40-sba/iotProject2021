@@ -11,7 +11,7 @@ import (
 const (
 	ServerPort = ":8080"
 	TempTopic  = "esp/dht/temperature"
-	_HumTopic  = "esp/dht/humidity"
+	HumTopic   = "esp/dht/humidity"
 )
 
 func main() {
@@ -23,6 +23,7 @@ func main() {
 	router := gin.Default()
 	mqttConnection := broker.NewMqttConnection("Go-Client")
 	mqttConnection.Subscribe(TempTopic)
+	mqttConnection.Subscribe(HumTopic)
 	v1 := router.Group("/api/v1")
 	{
 		v1.GET("/health", api.HealthStatusHandler(mqttConnection))
