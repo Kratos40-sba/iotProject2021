@@ -1,0 +1,33 @@
+- run mosquitto broker :
+ command : sudo docker run -it -p 1883:1883 --name mosquitto
+ -v ~/mosquitto/config:/mosquitto/config
+ -v ~/mosquitto/data:/mosquitto/data
+ -v ~/mosquitto/log:/mosquitto/log
+ eclipse-mosquitto
+ command : sudo docker  start mosquitto  // port 1883 host : 192.168.1.4
+***********************************************************************************
+- run influxdb :
+ command :docker run -d -p 8086:8086 --name influx -v influxdb:/var/lib/influxdb influxdb
+ create db : docker exec -it influx influxdb
+ create database iotDB .
+ command : sudo docker start influx    start // port 8086 host : 127.0.0.1 (localhost)
+***********************************************************************************
+- run the publisher (dht.ino)
+***********************************************************************************
+- run grafana  :
+ command : docker run -d -p 3000:3000 --name grafana grafana/grafana
+
+***********************************************************************************
+- run main.go  :
+ command :
+  go run main.go  // http server (data-service) runs at port 8080
+------------------------------------------------------------------------------------
+env variables :
+ export MQTT_HOST=192.168.1.4
+ export MQTT_PORT=1883
+ export MQTT_CLIENT_NAME=data-service
+ ---------------------------------
+ export INFLUX_HOST=127.0.0.1
+ export INFLUX_PORT=8086
+ export INFLUX_NAME=iotDB
+ export INFLUX_MEASUREMENT=dht

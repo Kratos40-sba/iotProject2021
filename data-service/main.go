@@ -25,6 +25,7 @@ func main() {
 	v1 := router.Group("/api/v1")
 	{
 		v1.GET("/health", api.HealthStatusHandler(mqttConnection, influxDBConnection))
+		//v1.GET("/measurement/")
 	}
 	router.NoRoute(func(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{"msg": "Route Not Defined"})

@@ -13,7 +13,7 @@ import (
 const (
 	InfluxDBHost        = "INFLUX_HOST"        //  localhost
 	InfluxDBPORT        = "INFLUX_PORT"        // 8086
-	InfluxDBName        = "INFLUX_NAME"        // iot
+	InfluxDBName        = "INFLUX_NAME"        // iotDB
 	InfluxDBMeasurement = "INFLUX_MEASUREMENT" // dht
 )
 
@@ -48,6 +48,7 @@ func (conn *Connection) Insert(event *models.DhtEvent) {
 		log.Println("InfluxDB fails to insert : ", err)
 	}
 }
+
 func (conn *Connection) GetLastNMeasurement(n uint) []models.DhtEvent {
 	events := make([]models.DhtEvent, 0, n)
 	return events
