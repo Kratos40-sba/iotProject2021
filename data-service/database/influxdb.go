@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"github.com/Kratos40-sba/data-service/models"
 	influx "github.com/influxdata/influxdb-client-go/v2"
 	"log"
@@ -10,9 +11,10 @@ import (
 )
 
 const (
-	InfluxDBHost        = "INFLUX_HOST"
-	InfluxDBName        = "INFLUX_NAME"
-	InfluxDBMeasurement = "INFLUX_MEASUREMENT"
+	InfluxDBHost        = "INFLUX_HOST"        //  localhost
+	InfluxDBPORT        = "INFLUX_PORT"        // 8086
+	InfluxDBName        = "INFLUX_NAME"        // iot
+	InfluxDBMeasurement = "INFLUX_MEASUREMENT" // dht
 )
 
 type Connection struct {
@@ -21,7 +23,8 @@ type Connection struct {
 
 func NewConnection() (conn *Connection) {
 	influx.DefaultOptions().HTTPClient()
-	client := influx.NewClient(os.Getenv(InfluxDBHost), "")
+	url := fmt.Sprintf("http://%s:%s", os.Getenv(InfluxDBHost), os.Getenv(InfluxDBPORT))
+	client := influx.NewClient(url, "")
 	conn = &Connection{client}
 	return conn
 }
@@ -44,4 +47,12 @@ func (conn *Connection) Insert(event *models.DhtEvent) {
 	if err != nil {
 		log.Println("InfluxDB fails to insert : ", err)
 	}
+}
+func (conn *Connection) GetLastNMeasurement(n uint) []models.DhtEvent {
+	events := make([]models.DhtEvent, 0, n)
+	return events
+}
+func (conn *Connection) GetLastMeasurementSinceT(t int64) []models.DhtEvent {
+	events := make([]models.DhtEvent, 0)
+	return events
 }
