@@ -54,12 +54,30 @@ func (conn *Connection) Insert(event *models.DhtEvent) {
 
 func (conn *Connection) GetLastNMeasurement(n uint) []models.DhtEvent {
 	events := make([]models.DhtEvent, 0, n)
+	//var e models.DhtEvent
+	queryAPI := conn.influxClient.QueryAPI(os.Getenv(InfluxDBOrg))
+	result, err := queryAPI.Query(context.Background(), ``)
+	if err == nil {
+		for result.Next() {
 
+		}
+	} else {
+		fmt.Printf("Query error : %s \n", result.Err().Error())
+	}
 	return events
 	// api/v1/measurement?n=10
 }
 func (conn *Connection) GetLastMeasurementSinceT(t int64) []models.DhtEvent {
 	events := make([]models.DhtEvent, 0)
+	queryAPI := conn.influxClient.QueryAPI(os.Getenv(InfluxDBOrg))
+	result, err := queryAPI.Query(context.Background(), ``)
+	if err == nil {
+		for result.Next() {
+
+		}
+	} else {
+		fmt.Printf("Query error : %s \n", result.Err().Error())
+	}
 	return events
 	// api/v1/measurement?t=10
 }
