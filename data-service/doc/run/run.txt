@@ -4,11 +4,11 @@
  -v ~/mosquitto/data:/mosquitto/data
  -v ~/mosquitto/log:/mosquitto/log
  eclipse-mosquitto
- command : sudo docker  start mosquitto  // port 1883 host : 192.168.1.4
+ command : sudo docker  start mosquitto  // port 1883 host : 192.168.1.4 // 1.2
 ***********************************************************************************
 - run influxdb :
  command :docker run -d -p 8086:8086 --name influx -v influxdb:/var/lib/influxdb influxdb
- create db : docker exec -it influx influxdb
+ create db : docker exec -it influx bash
  create database iotDB .
  command : sudo docker start influx    start // port 8086 host : 127.0.0.1 (localhost)
 ***********************************************************************************
@@ -26,8 +26,17 @@ env variables :
  export MQTT_HOST=192.168.1.4
  export MQTT_PORT=1883
  export MQTT_CLIENT_NAME=data-service
- ---------------------------------
+ -----------------------------------------------------------------------------------
  export INFLUX_HOST=127.0.0.1
  export INFLUX_PORT=8086
- export INFLUX_NAME=iotDB
+ export INFLUX_NAME=iot
  export INFLUX_MEASUREMENT=dht
+ export INFLUX_TOKEN=8XUbPy1ELeHws7OQmYghxZ0uVz8cb2oZ8bweuchNJ-jWhjyQu6gpV4C30fjCPa8LkvUTR0sB5KIIwPnn00qpVg==
+ You have entered:
+   Username:          abdou
+   Password : 123456789
+   Organization:      esi
+   Bucket:            iot
+   Retention Period:  infinite
+
+ -----------------------------------------------------------------------------------

@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	ServerPort = ":8080"
-	DhtTopic   = "esp/dht"
+	_HttpServer = "HTTP_SERVER"
+	DhtTopic    = "esp/dht"
+	_RfidTopic  = "rfid/id"
 )
 
 func main() {
@@ -22,14 +23,17 @@ func main() {
 	influxDBConnection := database.NewConnection()
 	mqttConnection := broker.NewMqttConnection()
 	mqttConnection.Subscribe(influxDBConnection, DhtTopic)
+
 	v1 := router.Group("/api/v1")
 	{
 		v1.GET("/health", api.HealthStatusHandler(mqttConnection, influxDBConnection))
+		v1.GET("/measurement?n=", api.LastNMeasurementHandler(influxDBConnection))
+		v1.GET("/measurement?t=", api.LastMeasurementSinceT(influxDBConnection))
 		//v1.GET("/measurement/")
 	}
 	router.NoRoute(func(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{"msg": "Route Not Defined"})
 	})
-	log.Fatalln(router.Run(ServerPort))
+	log.Fatalln(router.Run(":8080"))
 
 }

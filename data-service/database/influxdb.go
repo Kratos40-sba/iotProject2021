@@ -13,8 +13,10 @@ import (
 const (
 	InfluxDBHost        = "INFLUX_HOST"        //  localhost
 	InfluxDBPORT        = "INFLUX_PORT"        // 8086
-	InfluxDBName        = "INFLUX_NAME"        // iotDB
+	InfluxDBName        = "INFLUX_NAME"        // iot (bucket)
 	InfluxDBMeasurement = "INFLUX_MEASUREMENT" // dht
+	InfluxDBToken       = "INFLUX_TOKEN"
+	InfluxDBOrg         = "INFLUX_ORG" // esi
 )
 
 type Connection struct {
@@ -24,7 +26,8 @@ type Connection struct {
 func NewConnection() (conn *Connection) {
 	influx.DefaultOptions().HTTPClient()
 	url := fmt.Sprintf("http://%s:%s", os.Getenv(InfluxDBHost), os.Getenv(InfluxDBPORT))
-	client := influx.NewClient(url, "")
+	client := influx.NewClient(url, os.Getenv(InfluxDBToken))
+	//defer client.Close()
 	conn = &Connection{client}
 	return conn
 }
@@ -42,7 +45,7 @@ func (conn *Connection) Insert(event *models.DhtEvent) {
 		AddField("temperature", event.Temperature).
 		AddField("humidity", event.Humidity).
 		SetTime(time.Unix(event.Time, 0))
-	wAPI := conn.influxClient.WriteAPIBlocking("", os.Getenv(InfluxDBName))
+	wAPI := conn.influxClient.WriteAPIBlocking(os.Getenv(InfluxDBOrg), os.Getenv(InfluxDBName))
 	err := wAPI.WritePoint(context.Background(), point)
 	if err != nil {
 		log.Println("InfluxDB fails to insert : ", err)
@@ -51,9 +54,12 @@ func (conn *Connection) Insert(event *models.DhtEvent) {
 
 func (conn *Connection) GetLastNMeasurement(n uint) []models.DhtEvent {
 	events := make([]models.DhtEvent, 0, n)
+
 	return events
+	// api/v1/measurement?n=10
 }
 func (conn *Connection) GetLastMeasurementSinceT(t int64) []models.DhtEvent {
 	events := make([]models.DhtEvent, 0)
 	return events
+	// api/v1/measurement?t=10
 }

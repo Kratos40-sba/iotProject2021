@@ -47,6 +47,7 @@ func NewMqttConnection() (conn *Connection) {
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		log.Fatalln("Connection Problem :", token.Error())
 	}
+
 	conn = &Connection{client}
 	return conn
 }
@@ -65,7 +66,9 @@ func onMessageReceived(influxConn *database.Connection) func(client mqtt.Client,
 		event := models.DhtEvent{Time: time.Now().Unix()}
 		//b := new(bytes.Buffer)
 		switch msg.Topic() {
+		// esp/rfid
 		case "esp/dht":
+			// todo 24||50 => temp = 24 , humidity = 50
 			p := strings.Split(string(msg.Payload()), "||")
 			event.Temperature, _ = strconv.ParseFloat(p[0], 32)
 			event.Humidity, _ = strconv.ParseFloat(p[1], 32)
