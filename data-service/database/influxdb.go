@@ -27,7 +27,7 @@ func NewConnection() (conn *Connection) {
 	influx.DefaultOptions().HTTPClient()
 	url := fmt.Sprintf("http://%s:%s", os.Getenv(InfluxDBHost), os.Getenv(InfluxDBPORT))
 	client := influx.NewClient(url, os.Getenv(InfluxDBToken))
-	//defer client.Close()
+	defer client.Close()
 	conn = &Connection{client}
 	return conn
 }
@@ -80,4 +80,25 @@ func (conn *Connection) GetLastMeasurementSinceT(t int64) []models.DhtEvent {
 	}
 	return events
 	// api/v1/measurement?t=10
+}
+func (conn *Connection) ExampleInflux() []interface{} {
+	var tt []interface{}
+	queryAPI := conn.influxClient.QueryAPI(os.Getenv(InfluxDBOrg))
+	result, err := queryAPI.Query(context.Background(), `from(bucket:"iot")|> range(start: -1h) |> filter(fn: (r) => r._measurement == "dht" )`)
+	if err == nil {
+		for result.Next() {
+			var t interface{}
+			t = result.Record()
+			tt = append(tt, t)
+			/*
+					var t models.DhtEvent
+					  t.Temperature, _ =strconv.ParseFloat(fmt.Sprintf("%v",result.Record().ValueByKey("temperature")),32)
+				         t.Humidity , _  = strconv.ParseFloat(fmt.Sprintf("%v",result.Record().ValueByKey("humidity")),32)
+				         tt = append(tt, t)
+			*/
+		}
+	} else {
+		fmt.Printf("Query error : %s \n", result.Err().Error())
+	}
+	return tt
 }

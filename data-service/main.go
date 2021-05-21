@@ -29,6 +29,7 @@ func main() {
 		v1.GET("/health", api.HealthStatusHandler(mqttConnection, influxDBConnection))
 		v1.GET("/measurement?n=", api.LastNMeasurementHandler(influxDBConnection))
 		v1.GET("/measurement?t=", api.LastMeasurementSinceT(influxDBConnection))
+		v1.GET("/measurement", api.ExampleHandler(influxDBConnection))
 	}
 	router.NoRoute(func(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{"msg": "Route Not Defined"})
