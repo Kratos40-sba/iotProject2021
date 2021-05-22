@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/Kratos40-sba/data-service/models"
 	influx "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 	"log"
 	"os"
 	"time"
@@ -81,27 +83,27 @@ func (conn *Connection) GetLastMeasurementSinceT(t int64) []models.DhtEvent {
 	return events
 	// api/v1/measurement?t=10
 }
-func (conn *Connection) ExampleInflux() []interface{} {
-	var tt []interface{}
+func (conn *Connection) ExampleInflux() []models.DhtResponse {
+	var tt []models.DhtResponse
 	queryAPI := conn.influxClient.QueryAPI(os.Getenv(InfluxDBOrg))
 	result, err := queryAPI.Query(context.Background(),
 		`from(bucket:"iot")
               |> range(start: -1h) 
               |> drop(columns : ["_start","_stop","table","_result"])
-              |> filter(fn: (r) => r["_measurement"]=="dht")
+              |> rename(columns: {_value: "Value", _field: "Field",_measurement:"Measurement"})
+              |> filter(fn: (r) => r["Measurement"]=="dht")
               `)
 	if err == nil {
 		for result.Next() {
 			var t map[string]interface{}
+			var res models.DhtResponse
 			t = result.Record().Values()
-			fmt.Println(t)
-			tt = append(tt, t)
-			/*
-					var t models.DhtEvent
-					  t.Temperature, _ =strconv.ParseFloat(fmt.Sprintf("%v",result.Record().ValueByKey("temperature")),32)
-				         t.Humidity , _  = strconv.ParseFloat(fmt.Sprintf("%v",result.Record().ValueByKey("humidity")),32)
-				         tt = append(tt, t)
-			*/
+			err := mapstructure.Decode(t, &res)
+			if err != nil {
+				_ = errors.New("while decoding struct accrued an error ")
+			}
+			fmt.Println(res)
+			tt = append(tt, res)
 		}
 	} else {
 		fmt.Printf("Query error : %s \n", result.Err().Error())

@@ -18,7 +18,6 @@ func LastMeasurementSinceT(db *database.Connection) func(ctx *gin.Context) {
 }
 func ExampleHandler(db *database.Connection) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-
 		ctx.JSON(http.StatusOK, db.ExampleInflux())
 	}
 }
