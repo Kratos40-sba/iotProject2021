@@ -84,11 +84,17 @@ func (conn *Connection) GetLastMeasurementSinceT(t int64) []models.DhtEvent {
 func (conn *Connection) ExampleInflux() []interface{} {
 	var tt []interface{}
 	queryAPI := conn.influxClient.QueryAPI(os.Getenv(InfluxDBOrg))
-	result, err := queryAPI.Query(context.Background(), `from(bucket:"iot")|> range(start: -1h) |> filter(fn: (r) => r._measurement == "dht" )`)
+	result, err := queryAPI.Query(context.Background(),
+		`from(bucket:"iot")
+              |> range(start: -1h) 
+              |> drop(columns : ["_start","_stop","table","_result"])
+              |> filter(fn: (r) => r["_measurement"]=="dht")
+              `)
 	if err == nil {
 		for result.Next() {
-			var t interface{}
-			t = result.Record()
+			var t map[string]interface{}
+			t = result.Record().Values()
+			fmt.Println(t)
 			tt = append(tt, t)
 			/*
 					var t models.DhtEvent
