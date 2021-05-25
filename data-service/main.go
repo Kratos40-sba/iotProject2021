@@ -1,18 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Kratos40-sba/data-service/api"
-	"github.com/Kratos40-sba/data-service/broker"
 	"github.com/Kratos40-sba/data-service/database"
+	"github.com/Kratos40-sba/data-service/message"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"os"
 )
 
 const (
-	_HttpServer = "HTTP_SERVER"
-	DhtTopic    = "esp/dht"
-	_RfidTopic  = "rfid/id"
+	HttpServer = "HTTP_SERVER"
+	DhtTopic   = "esp/dht"
+	_RfidTopic = "esp/rfid"
 )
 
 func main() {
@@ -21,9 +23,8 @@ func main() {
 	*/
 	router := gin.Default()
 	influxDBConnection := database.NewConnection()
-	mqttConnection := broker.NewMqttConnection()
+	mqttConnection := message.NewMqttConnection()
 	mqttConnection.Subscribe(influxDBConnection, DhtTopic)
-
 	v1 := router.Group("/api/v1")
 	{
 		v1.GET("/health", api.HealthStatusHandler(mqttConnection, influxDBConnection))
@@ -34,6 +35,6 @@ func main() {
 	router.NoRoute(func(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{"msg": "Route Not Defined"})
 	})
-	log.Fatalln(router.Run(":8080"))
+	log.Fatalln(router.Run(fmt.Sprintf(":%s", os.Getenv(HttpServer))))
 
 }
