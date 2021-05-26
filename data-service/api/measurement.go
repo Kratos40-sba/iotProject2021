@@ -18,6 +18,11 @@ func LastMeasurementSinceT(db *database.Connection) func(ctx *gin.Context) {
 }
 func ExampleHandler(db *database.Connection) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, db.ExampleInflux())
+		err := ctx.ShouldBindJSON(db.ExampleInflux())
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, err)
+			return
+		}
+		//ctx.JSON(http.StatusOK, db.ExampleInflux())
 	}
 }
