@@ -23,6 +23,5 @@ func DbConnection() *gorm.DB {
 		log.Fatalln("Failed to connect to database!")
 	}
 	db.AutoMigrate(&models.DhtEvent{})
-	db.AutoMigrate(&models.RfidEvent{})
 	return db
 }
