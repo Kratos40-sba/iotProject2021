@@ -2,6 +2,7 @@ package config
 
 import "github.com/spf13/viper"
 
+/*
 type Config struct {
 	HttpServer        string `mapstructure:"HTTP_SERVER"`
 	MqttHost          string `mapstructure:"MQTT_HOST"`
@@ -14,8 +15,9 @@ type Config struct {
 	InfluxToken       string `mapstructure:"INFLUX_TOKEN"`
 	InfluxOrg         string `mapstructure:"INFLUX_ORG"`
 }
+*/
 
-func LoadConfig(path string) (c Config, err error) {
+func LoadConfig(path string) (err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")
@@ -24,6 +26,5 @@ func LoadConfig(path string) (c Config, err error) {
 	if err != nil {
 		return
 	}
-	err = viper.Unmarshal(&c)
 	return
 }

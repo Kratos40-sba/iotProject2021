@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/Kratos40-sba/data-service/api"
+	"github.com/Kratos40-sba/data-service/config"
 	"github.com/Kratos40-sba/data-service/database"
 	"github.com/Kratos40-sba/data-service/message"
 	"github.com/gin-gonic/gin"
@@ -17,20 +18,30 @@ const (
 	_RfidTopic = "esp/rfid"
 )
 
+func init() {
+	err := config.LoadConfig(".")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("Config file has been loaded ...")
+}
 func main() {
 	/*
 		todo check Gin/InfluxDB/Mqtt best practices
 	*/
 	router := gin.Default()
-	influxDBConnection := database.NewConnection()
+	psgrs := database.DbConnection()
+	router.Use(func(c *gin.Context) {
+		c.Set("db", psgrs)
+	})
+
 	mqttConnection := message.NewMqttConnection()
-	mqttConnection.Subscribe(influxDBConnection, DhtTopic)
+	mqttConnection.Subscribe(psgrs, DhtTopic)
 	v1 := router.Group("/api/v1")
 	{
-		v1.GET("/health", api.HealthStatusHandler(mqttConnection, influxDBConnection))
-		v1.GET("/measurement?n=", api.LastNMeasurementHandler(influxDBConnection))
-		v1.GET("/measurement?t=", api.LastMeasurementSinceT(influxDBConnection))
-		v1.GET("/measurement", api.ExampleHandler(influxDBConnection))
+		v1.GET("/health", api.HealthStatusHandler(mqttConnection))
+		v1.GET("/dht", api.GetAll)
+		v1.GET("/dht/:last", api.Last)
 	}
 	router.NoRoute(func(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{"msg": "Route Not Defined"})

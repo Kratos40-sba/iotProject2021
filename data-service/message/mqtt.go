@@ -2,9 +2,9 @@ package message
 
 import (
 	"fmt"
-	"github.com/Kratos40-sba/data-service/database"
 	"github.com/Kratos40-sba/data-service/models"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"gorm.io/gorm"
 	"log"
 	"os"
 	"strconv"
@@ -59,12 +59,10 @@ func (conn *Connection) IsClientConnected() bool {
 	return connected
 }
 
-func onMessageReceived(influxConn *database.Connection) func(client mqtt.Client, msg mqtt.Message) {
+func onMessageReceived(conn *gorm.DB) func(client mqtt.Client, msg mqtt.Message) {
 	return func(client mqtt.Client, msg mqtt.Message) {
-		//log.Printf("Received message : %s from topic : %s ", msg.Payload(), msg.Topic())
-		// insertion here
-		event := models.DhtEvent{Time: time.Now().Unix()}
-		//b := new(bytes.Buffer)
+		event := models.DhtEvent{Time: time.Now().Format("2006-01-02 15:04:05")}
+		event.Sensor = event.GetName()
 		switch msg.Topic() {
 		// esp/rfid
 		case "esp/dht":
@@ -73,14 +71,7 @@ func onMessageReceived(influxConn *database.Connection) func(client mqtt.Client,
 			event.Temperature, _ = strconv.ParseFloat(p[0], 32)
 			event.Humidity, _ = strconv.ParseFloat(p[1], 32)
 			log.Println(event)
-			influxConn.Insert(&event)
-			/*
-				err := json.Unmarshal(msg.Payload(), &event.Temperature)
-				if err != nil {
-					log.Println("Encoding Temperature failed : ", err)
-				}
-
-			*/
+			conn.Create(event)
 
 		default:
 			log.Println("Unknown Topic : ", msg.Topic())
@@ -89,8 +80,8 @@ func onMessageReceived(influxConn *database.Connection) func(client mqtt.Client,
 	}
 }
 
-func (conn *Connection) Subscribe(influxConn *database.Connection, topic string) {
-	token := conn.mqttClient.Subscribe(topic, QOS, onMessageReceived(influxConn))
+func (conn *Connection) Subscribe(connDb *gorm.DB, topic string) {
+	token := conn.mqttClient.Subscribe(topic, QOS, onMessageReceived(connDb))
 	token.Wait()
 	log.Println("Subscribed to topic : ", topic)
 }
